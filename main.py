@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import sys
 import time
-import random
 from src.crypto_utils import CryptoOperations
 from src.terminal_effects import TerminalEffects
 from src.log_generator import LogGenerator
@@ -37,7 +36,7 @@ def display_home_computer():
     /////////////////////////////////////////////////
     """
     effects.type_text(secret_content)
-    effects.type_text("\nType 'help' to see available commands...")
+    effects.type_text("\nType 'help' for available commands...")
 
 def connect_to_server(ip):
     effects = TerminalEffects()
@@ -96,11 +95,6 @@ def main():
                                 output = remote_server.handle_command(user_input)
                                 if output:
                                     print(output)
-
-                                # Randomly show background events
-                                if random.random() < 0.2:  # 20% chance for each command
-                                    log_entry = log_gen.generate_log()
-                                    effects.type_text(f"\033[1;32m{log_entry}\033[0m")
 
                             except KeyboardInterrupt:
                                 print("\n\033[1;31m[!] Command interrupted\033[0m")
