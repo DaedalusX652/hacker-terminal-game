@@ -15,8 +15,7 @@ class HomeComputer:
             'DOCUMENTS': {
                 'todo.txt': "1. Clean up old files\n2. Update security software\n3. Check that weird network glitch",
                 'work.txt': "Just normal boring work stuff...\nDeadlines...\nMeetings...",
-                'SECRETS.txt': """
-/////////////////////////////////////////////////
+                'SECRETS.txt': """/////////////////////////////////////////////////
 FOUND THIS WHILE DIGGING THROUGH OLD ARCHIVES
 SOMETHING'S NOT RIGHT WITH THIS SERVER
 
@@ -73,7 +72,7 @@ exit     - Exit terminal""",
 
     def _dir(self, args=None):
         current = self.current_dir.rstrip('\\')
-        output = [f"\n Volume in drive C is HOME_DISK",
+        output = [f" Volume in drive C is HOME_DISK",
                  f" Directory of {current}\n"]
 
         if current == 'C:':
@@ -86,11 +85,12 @@ exit     - Exit terminal""",
                 for filename in self.files[folder].keys():
                     output.append(f"         {filename}")
 
-        output.append("\n")
+        output.append("")  # Empty line at the end
         return "\n".join(output)
 
     def _cd(self, args):
         if not args:
+            self.current_dir = 'C:\\'
             return ""
 
         path = args[0].upper()
@@ -105,16 +105,18 @@ exit     - Exit terminal""",
 
     def _type(self, args):
         if not args:
-            return "File name missing"
+            return "Missing filename"
 
-        filename = args[0].lower()
+        filename = args[0].upper()  # Make case-insensitive
         current_folder = self.current_dir.split('\\')[-1]
 
         if current_folder == 'C:':
             return "File not found"
 
-        if current_folder in self.files and filename in self.files[current_folder]:
-            return self.files[current_folder][filename]
+        if current_folder in self.files and filename in [f.upper() for f in self.files[current_folder].keys()]:
+            # Get the original filename with correct case
+            original_filename = next(f for f in self.files[current_folder].keys() if f.upper() == filename)
+            return self.files[current_folder][original_filename]
 
         return "File not found"
 
