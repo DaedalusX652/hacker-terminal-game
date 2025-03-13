@@ -15,6 +15,17 @@ class FileNode:
 
 class RemoteServer:
     def __init__(self):
+        self.filesystem = {}
+        self.current_path = "/"
+        self.command_history = []
+        self.effects = TerminalEffects()
+        self.crypto = CryptoOperations()
+        
+        # Initialize the filesystem with files and directories
+        self._initialize_filesystem()
+
+class RemoteServer:
+    def __init__(self):
         self.effects = TerminalEffects()
         self.crypto = CryptoOperations()
         self.current_path = "/"
@@ -47,6 +58,12 @@ admin:x:1000:1000:System Administrator:/home/admin:/bin/bash
 researcher:x:1001:1001:Lead Researcher:/home/researcher:/bin/bash
 security:x:1002:1002:Security Officer:/home/security:/bin/bash
 blackbox:x:1003:1003:BlackBox System:/blackbox:/sbin/nologin""")
+
+        def _initialize_filesystem(self):
+        """Initialize the filesystem with files and directories."""
+        # Create root directories
+        for directory in ["/", "/etc", "/var", "/var/log", "/home", "/home/admin", "/research", "/research/logs", "/research/classified"]:
+            self.filesystem[directory] = {}
 
         # Add shadow file with encrypted passwords
         self._add_file("/etc/shadow", """root:$6$xyz...encrypted...:19432:0:99999:7:::
@@ -146,6 +163,14 @@ T̷h̷e̷y̷'̷r̷e̷ ̷h̷e̷r̷e̷.̷ ̷T̷h̷e̷y̷'̷r̷e̷ ̷i̷n̷s̷i̷d�
         """Add a file to the virtual filesystem."""
         directory = "/".join(path.split("/")[:-1])
         filename = path.split("/")[-1]
+        if direcdef _add_file(self, path: str, content: str, is_hidden: bool = False):
+        """Add a file to the filesystem."""
+        directory = "/".join(path.split("/")[:-1])
+        if not directory:
+            directory = "/"
+        filename = path.split("/")[-1]
+        
+        # Ensure the directory exists
         if directory not in self.filesystem:
             self.filesystem[directory] = {}
 
