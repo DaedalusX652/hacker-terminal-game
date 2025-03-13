@@ -90,7 +90,7 @@ exit     - Exit terminal""",
 
         output.extend([
             "",
-            f"     {len(self.files.get(current.split('\\')[-1], []))} File(s)",
+            f"     {len(self.files.get(current.split('\\\\')[-1], []))} File(s)",
             "     0 bytes free"
         ])
         return "\n".join(output)
