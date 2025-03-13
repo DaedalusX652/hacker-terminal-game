@@ -135,12 +135,15 @@ WHOEVER FINDS THIS, BE CAREFUL""",
 
         return f"Cannot run {program}"
 
-    def handle_command(self, command):
+    def handle_command(self, command: str) -> str:
         """Process user commands and return output."""
-        parts = command.strip().split()
-        if not parts:
+        command = command.strip()
+
+        # Handle empty or numeric-only inputs
+        if not command or command.isdigit():
             return ""
 
+        parts = command.split()
         cmd = parts[0].lower()
         args = parts[1:] if len(parts) > 1 else []
 
