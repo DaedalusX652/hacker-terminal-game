@@ -23,9 +23,9 @@ A text-based terminal game that simulates a retro hacking experience with ASCII 
 
 ### Option 1: Run on Replit (Recommended)
 
-1. Visit the project on Replit: [Hacker Terminal Simulator](https://replit.com/@YourUsername/HackerTerminalSimulator)
-2. Click the "Fork" button to create your own copy
-3. Press the "Run" button to start the game
+1. Visit the project on Replit: [CipherStealth](https://replit.com/@cassiansl29/CipherStealth?v=1)
+3. Click the "Fork" button to create your own copy
+4. Press the "Run" button to start the game
 
 ### Option 2: Local Installation
 
