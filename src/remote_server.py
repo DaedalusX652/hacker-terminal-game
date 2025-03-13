@@ -1,3 +1,4 @@
+
 import random
 import time
 from typing import List, Dict, Optional
@@ -22,14 +23,6 @@ class RemoteServer:
         self.crypto = CryptoOperations()
         
         # Initialize the filesystem with files and directories
-        self._initialize_filesystem()
-
-class RemoteServer:
-    def __init__(self):
-        self.effects = TerminalEffects()
-        self.crypto = CryptoOperations()
-        self.current_path = "/"
-        self.command_history: List[str] = []
         self._initialize_filesystem()
 
     def _initialize_filesystem(self):
