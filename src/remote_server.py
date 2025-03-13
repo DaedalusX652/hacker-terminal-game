@@ -30,13 +30,58 @@ class RemoteServer:
             "/var": {},
             "/var/log": {},
             "/etc": {},
-            "/secret": {}
+            "/secret": {},
+            "/research": {},
+            "/research/logs": {},
+            "/research/classified": {}
         }
 
         # Add interesting files
         self._add_file("/etc/passwd", "root:x:0:0:root:/root:/bin/bash\nadmin:x:1000:1000::/home/admin:/bin/bash")
-        self._add_file("/home/admin/.bash_history", "ssh-keygen\ncd /secret\necho 'launch_codes' > codes.txt\nchmod 600 codes.txt", True)
+        self._add_file("/home/admin/.bash_history", "cd /research/logs\ncat experiment_001.log\ncd /research/classified\nchmod 600 void_incursion.log", True)
         self._add_file("/var/log/auth.log", "Failed login attempt from 192.168.1.100\nSuccessful login for admin\nPrivilege escalation detected")
+
+        # Research Logs
+        self._add_file("/research/logs/experiment_001.log", """
+VOIDBORN Research Log - Experiment 001
+Date: 2024-12-03
+
+Initial observations of the shadow anomaly detected in Sector 7. The entity appears to be composed of non-baryonic matter, completely absorbing all incident light. Team members report intense feelings of unease and disorientation when within 50 meters of the anomaly.
+
+UPDATE: The shadow's behavior has become increasingly erratic. We've lost contact with Dr. Chen's team after they attempted to collect samples.
+
+WARNING: DO NOT ATTEMPT DIRECT CONTACT WITH THE ENTITY.
+""")
+
+        self._add_file("/research/logs/experiment_002.log", """
+VOIDBORN Research Log - Experiment 002
+Date: 2024-12-15
+
+The void creatures are getting stronger. They're no longer confined to Sector 7. Security footage shows them phasing through solid matter. The containment protocols have failed.
+
+Dr. Peterson's latest theory suggests they're not just shadows - they're tears in reality itself. The void is bleeding through.
+
+STATUS: CONTAINMENT BREACH IMMINENT
+""", True)
+
+        self._add_file("/research/classified/void_incursion.log", """
+CLASSIFIED - LEVEL OMEGA
+Date: 2024-12-20
+
+They're not just studying us. They're hunting us. The shadows have intelligence - maybe even consciousness. Each incursion grows larger, and the entities are becoming more organized.
+
+I've seen what lies beyond the tears they create. There's a vast darkness out there, watching, waiting. If anyone finds this log, SHUT DOWN THE FACILITY. The barrier between our world and theirs is weakening.
+
+The void hungers.
+
+Last transmission from Dr. Sarah Chen
+""", True)
+
+        self._add_file("/research/classified/.final_warning", """
+T̷h̷e̷y̷'̷r̷e̷ ̷h̷e̷r̷e̷.̷ ̷T̷h̷e̷y̷'̷r̷e̷ ̷i̷n̷s̷i̷d̷e̷ ̷t̷h̷e̷ ̷w̷a̷l̷l̷s̷.̷ ̷D̷o̷n̷'̷t̷ ̷l̷o̷o̷k̷ ̷a̷t̷ ̷t̷h̷e̷ ̷s̷h̷a̷d̷o̷w̷s̷.̷ ̷T̷h̷e̷y̷ ̷l̷o̷o̷k̷ ̷b̷a̷c̷k̷.̷
+""", True)
+
+        # Original secret files
         self._add_file("/secret/codes.txt", "LAUNCH CODES: DELTA-SEVEN-ALPHA-NINER", True)
         self._add_file("/secret/.hidden_vault", "Bitcoin wallet: 3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy", True)
 
@@ -46,7 +91,7 @@ class RemoteServer:
         filename = path.split("/")[-1]
         if directory not in self.filesystem:
             self.filesystem[directory] = {}
-        
+
         is_encrypted = random.random() < 0.3 and not path.endswith(("passwd", "auth.log"))
         if is_encrypted:
             key = self.crypto.generate_key()
@@ -64,7 +109,7 @@ class RemoteServer:
         """Process user commands and return output."""
         self.command_history.append(command)
         parts = command.strip().split()
-        
+
         if not parts:
             return ""
 
@@ -89,7 +134,7 @@ class RemoteServer:
         path = args[0] if args else self.current_path
         if path not in self.filesystem:
             return f"ls: cannot access '{path}': No such file or directory"
-        
+
         files = self.filesystem[path]
         output = []
         for name, node in files.items():
@@ -100,14 +145,17 @@ class RemoteServer:
     def _cd(self, args: List[str]) -> str:
         """Change directory."""
         if not args:
-            return "Usage: cd <directory>"
-        
+            self.current_path = "/"
+            return ""
+
         new_path = args[0]
         if new_path.startswith("/"):
             full_path = new_path
         else:
             full_path = f"{self.current_path.rstrip('/')}/{new_path}"
 
+        # Normalize the path
+        full_path = full_path.replace("//", "/")
         if full_path in self.filesystem:
             self.current_path = full_path
             return ""
@@ -117,13 +165,16 @@ class RemoteServer:
         """Display file contents."""
         if not args:
             return "Usage: cat <file>"
-        
-        path = args[0]
-        directory = "/".join(path.split("/")[:-1]) or self.current_path
-        filename = path.split("/")[-1]
+
+        filepath = args[0]
+        if not filepath.startswith('/'):
+            filepath = f"{self.current_path.rstrip('/')}/{filepath}"
+
+        directory = "/".join(filepath.split("/")[:-1])
+        filename = filepath.split("/")[-1]
 
         if directory not in self.filesystem or filename not in self.filesystem[directory]:
-            return f"cat: {path}: No such file or directory"
+            return f"cat: {filepath}: No such file or directory"
 
         file_node = self.filesystem[directory][filename]
         if file_node.is_encrypted:
@@ -154,14 +205,14 @@ help    - Show this help message"""
         self.effects.clear_screen()
         self.effects.type_text("\033[1;31m=== CONNECTING TO REMOTE SERVER ===\033[0m")
         self.effects.progress_bar(1, "Establishing secure connection")
-        
-        # ASCII art for old server
+
+        # ASCII art for VOIDBORN server
         server_art = """
         ===================
-        |  OLD-SEC-SERVER |
-        |  ============   |
-        |  ||  ||  ||    |
-        |  ||  ||  ||    |
+        |    VOIDBORN    |
+        |  ============  |
+        |  ||  ||  ||   |
+        |  ||  ||  ||   |
         ===================
         """
         self.effects.type_text(server_art)
