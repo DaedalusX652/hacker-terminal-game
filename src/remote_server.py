@@ -179,7 +179,7 @@ T̷h̷e̷y̷ ̷l̷o̷o̷k̷ ̷b̷a̷c̷k̷.̷""", True)
         args = parts[1:] if len(parts) > 1 else []
 
         commands = {
-            'list': self._list_contents,
+            'dir': self._list_contents,  # Changed from 'list' to 'dir'
             'cd': self._cd,
             'cat': self._cat,
             'pwd': self._pwd,
@@ -259,7 +259,7 @@ T̷h̷e̷y̷ ̷l̷o̷o̷k̷ ̷b̷a̷c̷k̷.̷""", True)
     def _help(self, args: List[str]) -> str:
         """Display help information."""
         return """Available commands:
-list    - List directory contents
+dir     - List directory contents
 cd      - Change directory
 cat     - Display file contents
 pwd     - Print working directory
