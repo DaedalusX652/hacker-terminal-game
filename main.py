@@ -40,7 +40,7 @@ WHOEVER FINDS THIS, BE CAREFUL
         self.current_dir = 'C:\\'
 
     def handle_command(self, command):
-        parts = command.strip().lower().split()
+        parts = command.strip().split()
         if not parts:
             return ""
 
@@ -66,11 +66,16 @@ exit     - Exit terminal""",
             'ip_connect': lambda _: None  # Let main() handle this
         }
 
-        if cmd in commands:
-            return commands[cmd](args)
+        if cmd.lower() in commands:
+            return commands[cmd.lower()](args)
         return "Bad command or file name"
 
+    def _get_current_folder(self):
+        """Get the current folder name from the path."""
+        return self.current_dir.rstrip('\\').split('\\')[-1]
+
     def _dir(self, args=None):
+        """List directory contents."""
         current = self.current_dir.rstrip('\\')
         output = [f" Volume in drive C is HOME_DISK",
                  f" Directory of {current}\n"]
@@ -80,15 +85,16 @@ exit     - Exit terminal""",
             for d in dirs:
                 output.append(f"<DIR>    {d}")
         else:
-            folder = current.split('\\')[-1]
+            folder = self._get_current_folder()
             if folder in self.files:
-                for filename in self.files[folder].keys():
+                for filename in sorted(self.files[folder].keys()):
                     output.append(f"         {filename}")
 
         output.append("")  # Empty line at the end
         return "\n".join(output)
 
     def _cd(self, args):
+        """Change directory."""
         if not args:
             self.current_dir = 'C:\\'
             return ""
@@ -104,19 +110,26 @@ exit     - Exit terminal""",
         return "Invalid directory"
 
     def _type(self, args):
+        """Display file contents."""
         if not args:
             return "Missing filename"
 
-        filename = args[0].upper()  # Make case-insensitive
-        current_folder = self.current_dir.split('\\')[-1]
+        filename = args[0]
+        current_folder = self._get_current_folder()
 
         if current_folder == 'C:':
             return "File not found"
 
-        if current_folder in self.files and filename in [f.upper() for f in self.files[current_folder].keys()]:
-            # Get the original filename with correct case
-            original_filename = next(f for f in self.files[current_folder].keys() if f.upper() == filename)
-            return self.files[current_folder][original_filename]
+        # Case-insensitive file lookup
+        if current_folder in self.files:
+            file_dict = self.files[current_folder]
+            matching_file = next(
+                (name for name in file_dict.keys() 
+                 if name.upper() == filename.upper()),
+                None
+            )
+            if matching_file:
+                return file_dict[matching_file]
 
         return "File not found"
 
