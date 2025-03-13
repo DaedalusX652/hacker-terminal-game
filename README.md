@@ -3,6 +3,10 @@
 
 A text-based terminal game that simulates a retro hacking experience with ASCII graphics.
 
+## Current update 0.1
+- Just released!
+- Working on adding content to VOIDBORN
+
 ## Features
 
 - Home Terminal interface with basic commands
