@@ -27,19 +27,48 @@ class RemoteServer:
             "/": {},
             "/home": {},
             "/home/admin": {},
+            "/home/researcher": {},
+            "/home/security": {},
             "/var": {},
             "/var/log": {},
             "/etc": {},
             "/secret": {},
             "/research": {},
             "/research/logs": {},
-            "/research/classified": {}
+            "/research/classified": {},
+            "/devices": {},
+            "/devices/terminals": {},
+            "/blackbox": {}
         }
 
-        # Add interesting files
-        self._add_file("/etc/passwd", "root:x:0:0:root:/root:/bin/bash\nadmin:x:1000:1000::/home/admin:/bin/bash")
-        self._add_file("/home/admin/.bash_history", "cd /research/logs\ncat experiment_001.log\ncd /research/classified\nchmod 600 void_incursion.log", True)
-        self._add_file("/var/log/auth.log", "Failed login attempt from 192.168.1.100\nSuccessful login for admin\nPrivilege escalation detected")
+        # Add system files and employee accounts
+        self._add_file("/etc/passwd", """root:x:0:0:root:/root:/bin/bash
+admin:x:1000:1000:System Administrator:/home/admin:/bin/bash
+researcher:x:1001:1001:Lead Researcher:/home/researcher:/bin/bash
+security:x:1002:1002:Security Officer:/home/security:/bin/bash
+blackbox:x:1003:1003:BlackBox System:/blackbox:/sbin/nologin""")
+
+        # Add shadow file with encrypted passwords
+        self._add_file("/etc/shadow", """root:$6$xyz...encrypted...:19432:0:99999:7:::
+admin:$6$saltstring$encrypted_hash:19432:0:99999:7:::
+researcher:$6$another$different_hash:19432:0:99999:7:::
+security:$6$classified$top_secret_hash:19432:0:99999:7:::""", True)
+
+        # Add bash history with suspicious commands
+        self._add_file("/home/admin/.bash_history", """cd /research/logs
+cat experiment_001.log
+cd /research/classified
+chmod 600 void_incursion.log
+ssh blackbox@localhost
+./activate_containment.sh
+tail -f /var/log/void.log""", True)
+
+        # Add suspicious security logs
+        self._add_file("/var/log/auth.log", """Failed login attempt from 192.168.1.100
+Successful login for admin
+[ALERT] Privilege escalation detected
+[WARNING] Multiple failed attempts to access /blackbox
+[CRITICAL] Containment field fluctuation detected""")
 
         # Research Logs
         self._add_file("/research/logs/experiment_001.log", """
@@ -64,6 +93,34 @@ Dr. Peterson's latest theory suggests they're not just shadows - they're tears i
 STATUS: CONTAINMENT BREACH IMMINENT
 """, True)
 
+        # Add device terminal logs
+        self._add_file("/devices/terminals/containment_001.log", """
+CONTAINMENT FIELD TERMINAL - SECTOR 7
+STATUS: CRITICAL FAILURE
+
+Field strength: 12% and dropping
+Void energy readings: OFF THE SCALE
+Last operator: Dr. Sarah Chen
+Last entry: "They're coming through. God help us all."
+""", True)
+
+        # Add black box data
+        self._add_file("/blackbox/containment_data.bin", """
+01001000 01000101 01001100 01010000 00100000 
+01010100 01001000 01000101 01011001 00100000 
+01000001 01010010 01000101 00100000 01001000 
+01000101 01010010 01000101
+""", True)
+
+        self._add_file("/blackbox/README.txt", """
+BLACK BOX SYSTEM - CLASSIFIED
+Access Level: OMEGA
+
+This system contains critical void containment data.
+DO NOT ATTEMPT TO DECRYPT WITHOUT AUTHORIZATION.
+""")
+
+        # Original research logs
         self._add_file("/research/classified/void_incursion.log", """
 CLASSIFIED - LEVEL OMEGA
 Date: 2024-12-20
@@ -81,7 +138,7 @@ Last transmission from Dr. Sarah Chen
 T̷h̷e̷y̷'̷r̷e̷ ̷h̷e̷r̷e̷.̷ ̷T̷h̷e̷y̷'̷r̷e̷ ̷i̷n̷s̷i̷d̷e̷ ̷t̷h̷e̷ ̷w̷a̷l̷l̷s̷.̷ ̷D̷o̷n̷'̷t̷ ̷l̷o̷o̷k̷ ̷a̷t̷ ̷t̷h̷e̷ ̷s̷h̷a̷d̷o̷w̷s̷.̷ ̷T̷h̷e̷y̷ ̷l̷o̷o̷k̷ ̷b̷a̷c̷k̷.̷
 """, True)
 
-        # Original secret files
+        # Add original secret files
         self._add_file("/secret/codes.txt", "LAUNCH CODES: DELTA-SEVEN-ALPHA-NINER", True)
         self._add_file("/secret/.hidden_vault", "Bitcoin wallet: 3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy", True)
 
