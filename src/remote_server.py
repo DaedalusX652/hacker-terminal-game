@@ -113,8 +113,22 @@ T̷h̷e̷y̷'̷r̷e̷ ̷h̷e̷r̷e̷.̷ ̷T̷h̷e̷y̷'̷r̷e̷ ̷i̷n̷s̷i̷d�
         if not parts:
             return ""
 
-        cmd = parts[0]
+        cmd = parts[0].lower()  # Make commands case-insensitive
         args = parts[1:] if len(parts) > 1 else []
+
+        # DOS to Unix command mapping
+        dos_to_unix = {
+            'dir': 'ls',
+            'type': 'cat',
+            'cls': 'clear',
+            'cd..': 'cd ..'
+        }
+
+        # Convert DOS commands to Unix equivalents
+        if cmd in dos_to_unix:
+            cmd = dos_to_unix[cmd]
+            if cmd == 'cd ..' and not args:
+                args = ['..']
 
         commands = {
             'ls': self._ls,
@@ -127,7 +141,7 @@ T̷h̷e̷y̷'̷r̷e̷ ̷h̷e̷r̷e̷.̷ ̷T̷h̷e̷y̷'̷r̷e̷ ̷i̷n̷s̷i̷d�
 
         if cmd in commands:
             return commands[cmd](args)
-        return f"Command not found: {cmd}"
+        return f"Bad command or file name: {cmd}"  # DOS-style error message
 
     def _ls(self, args: List[str]) -> str:
         """List directory contents."""
@@ -188,12 +202,13 @@ T̷h̷e̷y̷'̷r̷e̷ ̷h̷e̷r̷e̷.̷ ̷T̷h̷e̷y̷'̷r̷e̷ ̷i̷n̷s̷i̷d�
     def _help(self, args: List[str]) -> str:
         """Display help information."""
         return """Available commands:
-ls      - List directory contents
-cd      - Change directory
-cat     - Display file contents
-pwd     - Print working directory
-clear   - Clear screen
-help    - Show this help message"""
+ls, dir     - List directory contents
+cd, cd..    - Change directory
+cat, type   - Display file contents
+pwd         - Print working directory
+cls, clear  - Clear screen
+help        - Show this help message
+exit        - Exit current session"""
 
     def _clear(self, args: List[str]) -> str:
         """Clear the screen."""
@@ -216,5 +231,5 @@ help    - Show this help message"""
         ===================
         """
         self.effects.type_text(server_art)
-        self.effects.type_text("\033[1;32mConnection established. Use 'help' for available commands.\033[0m\n")
+        self.effects.type_text("\033[1;32mConnection established. Type 'help' for available commands.\033[0m\n")
         return True
