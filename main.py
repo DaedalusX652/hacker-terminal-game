@@ -70,27 +70,33 @@ exit     - Exit terminal""",
             return commands[cmd](args)
         return f"Bad command or file name: {parts[0]}"
 
+    def get_current_folder(self):
+        """Get the current folder name from the path."""
+        if self.current_dir == 'C:':
+            return 'C:'
+        return self.current_dir.split('\\')[-1]
+
     def _dir(self, args=None):
         """List directory contents."""
-        current = self.current_dir
+        folder = self.get_current_folder()
         output = [
-            f" Volume in drive C is HOME_DISK",
-            f" Directory of {current}",
+            " Volume in drive C is HOME_DISK",
+            f" Directory of {self.current_dir}",
             ""
         ]
 
-        if current == 'C:':
+        if folder == 'C:':
             for d in ['DOCUMENTS', 'GAMES', 'SYSTEM']:
                 output.append(f"<DIR>          {d}")
         else:
-            folder = current.split('\\')[-1]
             if folder in self.files:
                 for filename in sorted(self.files[folder].keys()):
                     output.append(f"         {filename}")
 
+        num_files = len(self.files.get(folder, {}))
         output.extend([
             "",
-            f"     {len(self.files.get(current.split('\\')[-1], []))} File(s)",
+            f"     {num_files} File(s)",
             "     0 bytes free"
         ])
         return "\n".join(output)
@@ -117,16 +123,16 @@ exit     - Exit terminal""",
             return "Missing filename"
 
         filename = args[0]
-        current_folder = self.current_dir.split('\\')[-1]
+        folder = self.get_current_folder()
 
-        if current_folder == 'C:':
+        if folder == 'C:':
             return f"File not found - {filename}"
 
-        if current_folder in self.files:
+        if folder in self.files:
             # Case-insensitive file lookup
-            for f in self.files[current_folder].keys():
+            for f in self.files[folder].keys():
                 if f.upper() == filename.upper():
-                    return self.files[current_folder][f]
+                    return self.files[folder][f]
 
         return f"File not found - {filename}"
 
