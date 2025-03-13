@@ -15,7 +15,7 @@ class FileNode:
 
 class RemoteServer:
     def __init__(self):
-        self.current_path = "/"
+        self.current_path = "/home"  # Changed from "/" to "/home"
         self.effects = TerminalEffects()
         self.crypto = CryptoOperations()
 
@@ -287,5 +287,5 @@ exit    - Exit session"""
         ===================
         """
         self.effects.type_text(server_art)
-        self.effects.type_text("\033[1;32mConnection established. Type 'help' for available commands.\033[0m\n")
+        self.effects.type_text("\033[1;32mConnection established. Starting in home directory. Type 'help' for available commands.\033[0m\n")
         return True
