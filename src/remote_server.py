@@ -19,27 +19,32 @@ class RemoteServer:
         self.effects = TerminalEffects()
         self.crypto = CryptoOperations()
 
-        # Initialize filesystem structure
-        self.filesystem = {
-            "/": {},
-            "/home": {},
-            "/home/admin": {},
-            "/home/researcher": {},
-            "/home/security": {},
-            "/var": {},
-            "/var/log": {},
-            "/etc": {},
-            "/secret": {},
-            "/research": {},
-            "/research/logs": {},
-            "/research/classified": {},
-            "/devices": {},
-            "/devices/terminals": {},
-            "/blackbox": {}
-        }
-
-        # Add initial files with content
+        # Initialize filesystem structure first
+        self.filesystem = {}
+        self._init_directory_structure()
         self._initialize_filesystem()
+
+    def _init_directory_structure(self):
+        """Initialize all directories first"""
+        directories = [
+            "/",
+            "/home",
+            "/home/admin",
+            "/home/researcher",
+            "/home/security",
+            "/var",
+            "/var/log",
+            "/etc",
+            "/secret",
+            "/research",
+            "/research/logs",
+            "/research/classified",
+            "/devices",
+            "/devices/terminals",
+            "/blackbox"
+        ]
+        for directory in directories:
+            self.filesystem[directory] = {}
 
     def _initialize_filesystem(self):
         """Initialize the filesystem with interesting content."""
@@ -195,18 +200,27 @@ T̷h̷e̷y̷ ̷l̷o̷o̷k̷ ̷b̷a̷c̷k̷.̷""", True)
             return f"list: cannot access '{path}': No such file or directory"
 
         output = []
-        # Add directories first
-        for dir_path in sorted(self.filesystem.keys()):
-            if dir_path.startswith(f"{path}/") and dir_path.count('/') == path.count('/') + 1:
-                dir_name = dir_path.split('/')[-1]
-                output.append(f"<DIR>    {dir_name}")
 
-        # Add files
+        # Get immediate subdirectories
+        subdirs = [d.split("/")[-1] for d in sorted(self.filesystem.keys())
+                  if d.startswith(path + "/") and d.count("/") == path.count("/") + 1]
+
+        # Add directories
+        for dirname in subdirs:
+            output.append(f"<DIR>    {dirname}")
+
+        # Add files from current directory
         for filename, node in sorted(self.filesystem[path].items()):
             if not node.is_hidden:
-                output.append(f"<FILE>   {filename}")
+                encrypted_marker = "[ENCRYPTED] " if node.is_encrypted else ""
+                output.append(f"<FILE>   {encrypted_marker}{filename}")
 
-        return "\n".join(output) if output else "Directory is empty"
+        # Format output
+        if output:
+            header = f"\nDirectory of {path}\n"
+            footer = f"\n{len(output)} item(s)\n"
+            return header + "\n".join(output) + footer
+        return "Directory is empty"
 
     def _cd(self, args: List[str]) -> str:
         """Change directory."""
