@@ -4,13 +4,7 @@ import time
 import random
 import threading
 import queue
-from typing import List, Tuple, Optional
-
-# Handle platform-specific imports
-if os.name == 'nt':
-    import msvcrt
-else:
-    msvcrt = None
+from typing import List, Tuple
 
 class SnakeGame:
     def __init__(self, width: int = 20, height: int = 10):
@@ -34,44 +28,46 @@ class SnakeGame:
     def _get_input(self):
         """Get keyboard input without blocking."""
         while not self.game_over:
-            if os.name == 'nt':  # Windows
-                if msvcrt and msvcrt.kbhit():
-                    key = msvcrt.getch()
-                    self._input_queue.put(key)
-            else:  # Unix-like
-                import select
-                try:
-                    if select.select([sys.stdin], [], [], 0.1)[0]:
-                        key = sys.stdin.read(1)
-                        self._input_queue.put(key)
-                except:
-                    pass  # Handle any potential select errors
-            time.sleep(0.1)
+            try:
+                if sys.stdin.isatty():
+                    import termios
+                    import tty
+                    import select
+
+                    # Save the terminal settings
+                    old_settings = termios.tcgetattr(sys.stdin)
+                    try:
+                        # Set the terminal to raw mode
+                        tty.setraw(sys.stdin.fileno())
+
+                        if select.select([sys.stdin], [], [], 0.1)[0]:
+                            key = sys.stdin.read(1)
+                            if key == '\x03':  # Ctrl+C
+                                self.game_over = True
+                                break
+                            self._input_queue.put(key)
+                    finally:
+                        # Restore terminal settings
+                        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
+            except Exception:
+                time.sleep(0.1)
+                continue
 
     def start(self):
         """Start the game."""
-        if not os.name == 'nt':
-            # Set up Unix terminal
-            import termios
-            import tty
-            old_settings = termios.tcgetattr(sys.stdin)
-            try:
-                tty.setraw(sys.stdin.fileno())
-
-                # Start input thread
-                input_thread = threading.Thread(target=self._get_input)
-                input_thread.daemon = True
-                input_thread.start()
-
-                self._game_loop()
-            finally:
-                termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
-        else:
-            # Windows version
+        try:
+            # Start input thread
             input_thread = threading.Thread(target=self._get_input)
             input_thread.daemon = True
             input_thread.start()
+
             self._game_loop()
+        except KeyboardInterrupt:
+            self.game_over = True
+        finally:
+            if os.name != 'nt':
+                # Restore terminal
+                os.system('stty sane')
 
     def _game_loop(self):
         """Main game loop."""
@@ -112,27 +108,24 @@ class SnakeGame:
         # Game over screen
         os.system('cls' if os.name == 'nt' else 'clear')
         print(f"\nGame Over! Score: {self.score}")
-        print("\nPress Enter to exit...")
-        sys.exit(0)
 
     def _handle_input(self, key):
         """Handle keyboard input."""
-        if isinstance(key, bytes):
-            key = key.lower()
-        else:
-            key = key.lower().encode()
-
         # Direction mappings
         directions = {
-            b'w': (0, -1),  # Up
-            b'a': (-1, 0),  # Left
-            b's': (0, 1),   # Down
-            b'd': (1, 0),   # Right
+            'w': (0, -1),   # Up
+            'a': (-1, 0),   # Left
+            's': (0, 1),    # Down
+            'd': (1, 0),    # Right
+            'W': (0, -1),   # Up
+            'A': (-1, 0),   # Left
+            'S': (0, 1),    # Down
+            'D': (1, 0),    # Right
         }
 
         if key in directions:
-            # Don't allow reversing direction
             new_dir = directions[key]
+            # Don't allow reversing direction
             if (new_dir[0] != -self.direction[0] or 
                 new_dir[1] != -self.direction[1]):
                 self.direction = new_dir
@@ -141,7 +134,7 @@ class SnakeGame:
         """Draw the game board."""
         os.system('cls' if os.name == 'nt' else 'clear')
 
-        # Draw top border with cool ASCII art
+        # Draw top border
         print('╔' + '═' * (self.width * 2) + '╗')
 
         for y in range(self.height):
