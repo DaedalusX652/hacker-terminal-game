@@ -36,7 +36,7 @@ A text-based terminal game that simulates a retro hacking experience with ASCII 
 
 1. Clone the repository:
    ```
-   git clone https://github.com/YourUsername/hacker-terminal-simulator.git
+   git clone https://github.com/DaedalusX652/hacker-terminal-game.git
    cd hacker-terminal-simulator
    ```
 
