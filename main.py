@@ -1,10 +1,145 @@
 #!/usr/bin/env python3
+import os
 import sys
 import time
 from src.crypto_utils import CryptoOperations
 from src.terminal_effects import TerminalEffects
 from src.log_generator import LogGenerator
 from src.remote_server import RemoteServer
+from src.ascii_games import SnakeGame
+
+class HomeComputer:
+    def __init__(self):
+        self.effects = TerminalEffects()
+        self.files = {
+            'DOCUMENTS': {
+                'todo.txt': "1. Clean up old files\n2. Update security software\n3. Check that weird network glitch",
+                'work.txt': "Just normal boring work stuff...\nDeadlines...\nMeetings...",
+                'SECRETS.txt': """
+/////////////////////////////////////////////////
+FOUND THIS WHILE DIGGING THROUGH OLD ARCHIVES
+SOMETHING'S NOT RIGHT WITH THIS SERVER
+
+IP: 192.168.13.666
+
+STRANGE LOGS ABOUT SHADOWS AND VOID
+MOST FILES ENCRYPTED
+
+USE ip_connect TO ACCESS - NO PASSWORD NEEDED
+WHOEVER FINDS THIS, BE CAREFUL
+/////////////////////////////////////////////////"""
+            },
+            'GAMES': {
+                'snake.exe': "[ASCII Snake Game - Type 'run snake.exe' to play]",
+                'tetris.exe': "[Coming soon...]"
+            },
+            'SYSTEM': {
+                'config.sys': "[SYSTEM FILE]",
+                'autoexec.bat': "[SYSTEM FILE]"
+            }
+        }
+        self.current_dir = 'C:\\'
+
+    def handle_command(self, command):
+        parts = command.strip().lower().split()
+        if not parts:
+            return ""
+
+        cmd = parts[0]
+        args = parts[1:] if len(parts) > 1 else []
+
+        # DOS command mappings
+        commands = {
+            'dir': self._dir,
+            'cd': self._cd,
+            'type': self._type,
+            'cls': lambda _: self.effects.clear_screen() or "",
+            'run': self._run,
+            'help': lambda _: """Available commands:
+dir      - List directory contents
+cd       - Change directory
+type     - Display file contents
+run      - Run a program (e.g., 'run snake.exe')
+cls      - Clear screen
+help     - Show this help message
+ip_connect <ip> - Connect to remote server
+exit     - Exit terminal""",
+            'ip_connect': lambda _: None  # Let main() handle this
+        }
+
+        if cmd in commands:
+            return commands[cmd](args)
+        return "Bad command or file name"
+
+    def _dir(self, args=None):
+        current = self.current_dir.rstrip('\\')
+        output = [f"\n Volume in drive C is HOME_DISK",
+                 f" Directory of {current}\n"]
+
+        if current == 'C:':
+            dirs = ['DOCUMENTS', 'GAMES', 'SYSTEM']
+            for d in dirs:
+                output.append(f"<DIR>    {d}")
+        else:
+            folder = current.split('\\')[-1]
+            if folder in self.files:
+                for filename in self.files[folder].keys():
+                    output.append(f"         {filename}")
+
+        output.append("\n")
+        return "\n".join(output)
+
+    def _cd(self, args):
+        if not args:
+            return ""
+
+        path = args[0].upper()
+        if path == '..':
+            self.current_dir = 'C:\\'
+            return ""
+        elif path in ['DOCUMENTS', 'GAMES', 'SYSTEM']:
+            self.current_dir = f'C:\\{path}'
+            return ""
+
+        return "Invalid directory"
+
+    def _type(self, args):
+        if not args:
+            return "File name missing"
+
+        filename = args[0].lower()
+        current_folder = self.current_dir.split('\\')[-1]
+
+        if current_folder == 'C:':
+            return "File not found"
+
+        if current_folder in self.files and filename in self.files[current_folder]:
+            return self.files[current_folder][filename]
+
+        return "File not found"
+
+    def _run(self, args):
+        """Run a program (game)."""
+        if not args:
+            return "Missing program name"
+
+        if self.current_dir != 'C:\\GAMES':
+            return "Can only run programs from C:\\GAMES"
+
+        program = args[0].lower()
+        if program == 'snake.exe':
+            try:
+                game = SnakeGame()
+                self.effects.clear_screen()
+                game.start()
+                self.effects.clear_screen()
+                return "Game session ended"
+            except Exception as e:
+                return f"Error running game: {str(e)}"
+        elif program == 'tetris.exe':
+            return "Tetris coming soon..."
+
+        return f"Cannot run {program}"
 
 def display_home_computer():
     effects = TerminalEffects()
@@ -14,29 +149,7 @@ def display_home_computer():
     time.sleep(1)
     effects.type_text("\nScrolling through old files...")
     time.sleep(0.5)
-    effects.type_text("\n[!] Wait... what's this? Found a strange file...")
-    time.sleep(0.5)
-
-    # Display the mysterious SECRETS.txt content
-    effects.type_text("\n\nOpening SECRETS.txt...")
-    effects.progress_bar(1, "Decoding file")
-
-    secret_content = """
-    /////////////////////////////////////////////////
-    FOUND THIS WHILE DIGGING THROUGH OLD ARCHIVES
-    SOMETHING'S NOT RIGHT WITH THIS SERVER
-
-    IP: 192.168.13.666
-
-    STRANGE LOGS ABOUT SHADOWS AND VOID
-    MOST FILES ENCRYPTED
-
-    USE ip_connect TO ACCESS - NO PASSWORD NEEDED
-    WHOEVER FINDS THIS, BE CAREFUL
-    /////////////////////////////////////////////////
-    """
-    effects.type_text(secret_content)
-    effects.type_text("\nType 'help' for available commands...")
+    effects.type_text("\nType 'help' for available commands.\n")
 
 def connect_to_server(ip):
     effects = TerminalEffects()
@@ -47,6 +160,7 @@ def connect_to_server(ip):
 
 def main():
     effects = TerminalEffects()
+    home_pc = HomeComputer()
     print("[DEBUG] Terminal effects initialized")
 
     try:
@@ -54,20 +168,15 @@ def main():
         display_home_computer()
 
         while True:
-            command = input("\033[1;36mC:\\HOME> \033[0m").strip().lower()  # DOS-style prompt
+            # Show proper DOS-style directory prompt
+            prompt = f"\033[1;36m{home_pc.current_dir}> \033[0m"
+            command = input(prompt).strip()
 
-            if command == "exit":
+            if command.lower() == "exit":
                 effects.type_text("\nTerminating session... Goodbye!")
                 break
-            elif command == "help":
-                print("\nAvailable commands:")
-                print("- ip_connect <ip>  : Connect to a remote server")
-                print("- cls             : Clear the screen")
-                print("- help            : Show this help message")
-                print("- exit            : Exit the terminal")
-            elif command == "cls":
-                effects.clear_screen()
-            elif command.startswith("ip_connect"):
+
+            if command.startswith("ip_connect"):
                 parts = command.split()
                 if len(parts) != 2:
                     print("Syntax error. Usage: ip_connect <ip>")
@@ -82,27 +191,28 @@ def main():
                         print("[DEBUG] All components initialized successfully")
 
                         # Start remote server session
-                        remote_server.start_session()
+                        if remote_server.start_session():
+                            # Interactive terminal loop for remote server
+                            while True:
+                                try:
+                                    user_input = input(f"\033[1;36m{remote_server.current_path}>\033[0m ")
+                                    if user_input.lower() == 'exit':
+                                        effects.type_text("\n[!] Connection terminated")
+                                        break
 
-                        # Interactive terminal loop for remote server
-                        while True:
-                            try:
-                                user_input = input(f"\033[1;36m{remote_server.current_path}>\033[0m ")
-                                if user_input.lower() == 'exit':
-                                    effects.type_text("\n[!] Connection terminated")
-                                    break
+                                    output = remote_server.handle_command(user_input)
+                                    if output:
+                                        print(output)
 
-                                output = remote_server.handle_command(user_input)
-                                if output:
-                                    print(output)
-
-                            except KeyboardInterrupt:
-                                print("\n\033[1;31m[!] Command interrupted\033[0m")
-                                continue
+                                except KeyboardInterrupt:
+                                    print("\n\033[1;31m[!] Command interrupted\033[0m")
+                                    continue
                 else:
                     print(f"Connection failed: Could not reach {parts[1]}")
             else:
-                print("Bad command or file name")  # Classic DOS error message
+                output = home_pc.handle_command(command)
+                if output is not None:
+                    print(output)
 
     except KeyboardInterrupt:
         effects.clear_screen()
