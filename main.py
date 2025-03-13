@@ -172,8 +172,8 @@ exit     - Exit terminal""",
 def connect_to_server(ip):
     effects = TerminalEffects()
     effects.type_text(f"\n\n[+] Attempting connection to {ip}...")
-    effects.progress_bar(1, "Establishing connection")
-    effects.matrix_effect(1.0)
+    effects.progress_bar(0.8, "Establishing connection")  # Reduced time for better UX
+    effects.matrix_effect(0.8)  # Reduced time for better UX
     return True
 
 def main():

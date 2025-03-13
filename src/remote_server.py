@@ -152,9 +152,18 @@ T̷h̷e̷y̷ ̷l̷o̷o̷k̷ ̷b̷a̷c̷k̷.̷""", True)
         )
 
     def _normalize_path(self, path: str) -> str:
-        """Convert any path to absolute path."""
+        """Convert any path to absolute path with optimized processing."""
+        # Quick return for root
+        if path == '/':
+            return '/'
+            
+        # Handle relative paths
         if not path.startswith('/'):
             path = f"{self.current_path.rstrip('/')}/{path}"
+
+        # Optimize common cases
+        if '.' not in path:
+            return path
 
         # Handle .. and .
         parts = []
