@@ -14,6 +14,11 @@ A text-based terminal game that simulates a retro hacking experience with ASCII 
 - ASCII Snake game that you can play inside the terminal
 - Authentic-looking terminal effects and animations
 
+## Coming Soon
+
+- More content
+- Tetris
+
 ## Installation Instructions
 
 ### Prerequisites
