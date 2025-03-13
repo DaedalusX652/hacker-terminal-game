@@ -48,44 +48,29 @@ WHOEVER FINDS THIS, BE CAREFUL
         cmd = parts[0].lower()  # Make commands case-insensitive
         args = parts[1:] if len(parts) > 1 else []
 
-        # DOS to Unix command mapping
-        dos_to_unix = {
-            'dir': 'ls',
-            'type': 'cat',
-            'cls': 'clear',
-            'cd..': 'cd ..'
-        }
-
-        # Convert DOS commands to Unix equivalents
-        if cmd in dos_to_unix:
-            cmd = dos_to_unix[cmd]
-            if cmd == 'cd ..' and not args:
-                args = ['..']
-
         commands = {
-            'ls': self._dir,
+            'dir': self._dir,
             'cd': self._cd,
-            'cat': self._type,
-            'pwd': lambda _: self.current_dir,
-            'help': lambda _: """Available commands:
-ls, dir     - List directory contents
-cd, cd..    - Change directory
-cat, type   - Display file contents
-run         - Run a program (e.g., 'run snake.exe')
-cls, clear  - Clear screen
-help        - Show this help message
-ip_connect <ip> - Connect to remote server
-exit        - Exit terminal""",
-            'clear': lambda _: self.effects.clear_screen() or "",
+            'type': self._type,
+            'cls': lambda _: self.effects.clear_screen() or "",
             'run': self._run,
+            'help': lambda _: """Available commands:
+dir      - List directory contents
+cd       - Change directory
+type     - Display file contents
+run      - Run a program (e.g., 'run snake.exe')
+cls      - Clear screen
+help     - Show this help message
+ip_connect <ip> - Connect to remote server
+exit     - Exit terminal""",
             'ip_connect': lambda _: None  # Let main() handle this
         }
 
         if cmd in commands:
             return commands[cmd](args)
-        return f"Bad command or file name: {parts[0]}"  # DOS-style error message
+        return f"Bad command or file name: {parts[0]}"
 
-    def _dir(self, args: List[str] = None) -> str:
+    def _dir(self, args=None):
         """List directory contents."""
         current = self.current_dir
         output = [
@@ -95,62 +80,57 @@ exit        - Exit terminal""",
         ]
 
         if current == 'C:':
-            dirs = ['DOCUMENTS', 'GAMES', 'SYSTEM']
-            for d in dirs:
+            for d in ['DOCUMENTS', 'GAMES', 'SYSTEM']:
                 output.append(f"<DIR>          {d}")
         else:
-            folder = self.current_dir.split('\\')[-1]
+            folder = current.split('\\')[-1]
             if folder in self.files:
                 for filename in sorted(self.files[folder].keys()):
-                    output.append(f"                {filename}")
+                    output.append(f"         {filename}")
 
         output.extend([
             "",
-            f"     {len(self.files.get(folder, []))} File(s)",
+            f"     {len(self.files.get(current.split('\\')[-1], []))} File(s)",
             "     0 bytes free"
         ])
         return "\n".join(output)
 
-    def _cd(self, args: List[str]) -> str:
+    def _cd(self, args):
         """Change directory."""
         if not args:
             self.current_dir = 'C:'
             return ""
 
-        new_path = args[0].upper()
-        if new_path in ['..', '\\', '/']:
+        path = args[0].upper()
+        if path in ['..', '\\', '/']:
             self.current_dir = 'C:'
             return ""
-        elif new_path in ['DOCUMENTS', 'GAMES', 'SYSTEM']:
-            self.current_dir = f'C:\\{new_path}'
+        elif path in ['DOCUMENTS', 'GAMES', 'SYSTEM']:
+            self.current_dir = f'C:\\{path}'
             return ""
 
         return f"Invalid directory {args[0]}"
 
-    def _type(self, args: List[str]) -> str:
+    def _type(self, args):
         """Display file contents."""
         if not args:
-            return "Usage: type <file>"
+            return "Missing filename"
 
         filename = args[0]
-        folder = self.current_dir.split('\\')[-1]
+        current_folder = self.current_dir.split('\\')[-1]
 
-        if folder == 'C:':
+        if current_folder == 'C:':
             return f"File not found - {filename}"
 
-        if folder in self.files:
+        if current_folder in self.files:
             # Case-insensitive file lookup
-            matching_file = next(
-                (name for name in self.files[folder].keys() 
-                 if name.upper() == filename.upper()),
-                None
-            )
-            if matching_file:
-                return self.files[folder][matching_file]
+            for f in self.files[current_folder].keys():
+                if f.upper() == filename.upper():
+                    return self.files[current_folder][f]
 
         return f"File not found - {filename}"
 
-    def _run(self, args: List[str]) -> str:
+    def _run(self, args):
         """Run a program (game)."""
         if not args:
             return "Missing program name"
