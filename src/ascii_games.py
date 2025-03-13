@@ -155,3 +155,121 @@ class SnakeGame:
         print('╚' + '═' * (self.width * 2) + '╝')
         print(f'\nScore: {self.score}')
         print('\nUse WASD to move, Ctrl+C to exit')
+import os
+import time
+import random
+import sys
+import select
+import termios
+import tty
+
+class SnakeGame:
+    def __init__(self, width=20, height=10):
+        self.width = width
+        self.height = height
+        self.snake = [(width // 2, height // 2)]
+        self.direction = (1, 0)  # (x, y) Right direction initially
+        self.food = self._place_food()
+        self.score = 0
+        self.game_over = False
+        
+    def _place_food(self):
+        """Place food at a random position not occupied by the snake."""
+        while True:
+            food = (random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+            if food not in self.snake:
+                return food
+                
+    def _get_key(self, timeout=0.1):
+        """Get a keypress without waiting for enter."""
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
+        try:
+            tty.setraw(fd)
+            rlist, _, _ = select.select([sys.stdin], [], [], timeout)
+            if rlist:
+                return sys.stdin.read(1)
+            else:
+                return None
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+            
+    def _update_direction(self, key):
+        """Update the snake's direction based on keyboard input."""
+        if key == 'w' and self.direction != (0, 1):  # Up
+            self.direction = (0, -1)
+        elif key == 's' and self.direction != (0, -1):  # Down
+            self.direction = (0, 1)
+        elif key == 'a' and self.direction != (1, 0):  # Left
+            self.direction = (-1, 0)
+        elif key == 'd' and self.direction != (-1, 0):  # Right
+            self.direction = (1, 0)
+        elif key == 'q':  # Quit
+            self.game_over = True
+            
+    def _move_snake(self):
+        """Move the snake in its current direction."""
+        head_x, head_y = self.snake[0]
+        dx, dy = self.direction
+        new_head = ((head_x + dx) % self.width, (head_y + dy) % self.height)
+        
+        # Check if snake hits itself
+        if new_head in self.snake:
+            self.game_over = True
+            return
+            
+        self.snake.insert(0, new_head)
+        
+        # Check if snake eats food
+        if new_head == self.food:
+            self.score += 1
+            self.food = self._place_food()
+        else:
+            self.snake.pop()
+            
+    def _draw_game(self):
+        """Draw the current game state."""
+        os.system('cls' if os.name == 'nt' else 'clear')
+        
+        # Draw top border
+        print("+" + "-" * self.width + "+")
+        
+        # Draw game area
+        for y in range(self.height):
+            line = "|"
+            for x in range(self.width):
+                if (x, y) == self.snake[0]:
+                    line += "O"  # Snake head
+                elif (x, y) in self.snake[1:]:
+                    line += "o"  # Snake body
+                elif (x, y) == self.food:
+                    line += "X"  # Food
+                else:
+                    line += " "  # Empty space
+            line += "|"
+            print(line)
+            
+        # Draw bottom border
+        print("+" + "-" * self.width + "+")
+        print(f"Score: {self.score} | Use WASD to move, Q to quit")
+        
+    def start(self):
+        """Start the game loop."""
+        try:
+            while not self.game_over:
+                self._draw_game()
+                key = self._get_key(0.1)
+                if key:
+                    self._update_direction(key)
+                self._move_snake()
+                time.sleep(0.1)
+                
+            print(f"\nGame Over! Final Score: {self.score}")
+            print("Press any key to exit...")
+            self._get_key()
+            
+        except Exception as e:
+            print(f"Game error: {str(e)}")
+        finally:
+            # Reset terminal
+            os.system('cls' if os.name == 'nt' else 'clear')
