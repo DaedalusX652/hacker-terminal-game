@@ -20,16 +20,23 @@ class LogGenerator:
             "mongodb", "redis", "systemd", "cron"
         ]
         
-        # Pre-generate some IP addresses for performance
-        self._cached_ips = [self.generate_ip() for _ in range(20)]
+        # Initialize _cached_ips and _ip_index first to avoid circular reference
+        self._cached_ips = []
         self._ip_index = 0
+        
+        # Now populate with pre-generated IPs
+        self._cached_ips = [self._generate_new_ip() for _ in range(20)]
+
+    def _generate_new_ip(self) -> str:
+        """Generate a completely new IP address without using cache."""
+        base = random.choice(self.ip_addresses)
+        return f"{base}{random.randint(1, 254)}"
 
     def generate_ip(self) -> str:
         """Generate a random IP address."""
         # Use cached IPs with occasional regeneration for variation
         if random.random() > 0.7:  # 30% chance to generate new IP
-            base = random.choice(self.ip_addresses)
-            return f"{base}{random.randint(1, 254)}"
+            return self._generate_new_ip()
         else:
             # Use pre-generated IPs in a round-robin fashion
             ip = self._cached_ips[self._ip_index]
