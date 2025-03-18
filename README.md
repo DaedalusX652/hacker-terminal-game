@@ -1,11 +1,10 @@
 
-## [Hacker Terminal Simulator (Ciph3rSt3@lth)](https://replit.com/@cassiansl29/hacker-terminal-game)
+## [Cypher Stealth](https://replit.com/@cassiansl29/hacker-terminal-game)
 
-A text-based terminal game that simulates a retro hacking experience with ASCII graphics.
+A text-based terminal game that simulates a retro DOS computer experience with secrets to find, dund to be had, and ASCII graphics.
 
-## Current update 0.1
-- Just released!
-- Working on adding content to VOIDBORN
+## Current update 0.7
+- Working on a decoding issue
 
 ## Features
 
