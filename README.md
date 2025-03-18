@@ -1,9 +1,11 @@
 
 ## [Cypher Stealth](https://replit.com/@cassiansl29/hacker-terminal-game)
 
-A text-based terminal game that simulates a retro DOS computer experience with secrets to find, dund to be had, and ASCII graphics.
+## [Cypher Stealth](https://replit.com/@cassiansl29/hacker-terminal-game)
 
-## Current update 0.7
+A text-based terminal game that simulates a retro DOS computer experience with secrets to find, fun to be had, and ASCII graphics.
+
+## Current Update 0.7
 - Working on a decoding issue
 
 ## Features
@@ -28,46 +30,42 @@ A text-based terminal game that simulates a retro DOS computer experience with s
 ### Option 1: Run on Replit (Recommended)
 
 1. Visit the project on Replit: [CipherStealth](https://replit.com/@cassiansl29/CipherStealth?v=1)
-3. Click the "Fork" button to create your own copy
-4. Press the "Run" button to start the game
+2. Click the "Fork" button to create your own copy
+3. Press the "Run" button to start the game
 
 ### Option 2: Local Installation
 
 1. Clone the repository:
-   ```
+   ```sh
    git clone https://github.com/DaedalusX652/hacker-terminal-game.git
    cd hacker-terminal-simulator
-   ```
+Install dependencies:
 
-2. Install dependencies:
-   ```
-   pip install cryptography
-   ```
+sh
+pip install cryptography
+Run the game:
 
-3. Run the game:
-   ```
-   python main.py
-   ```
+sh
+python main.py
+How to Play
+Start the game with python main.py
 
-## How to Play
+Use these commands in the home terminal:
 
-1. Start the game with `python main.py`
-2. Use these commands in the home terminal:
-   - `dir` - List directory contents
-   - `cd` - Change directory
-   - `type` - Display file contents
-   - `run` - Run a program (e.g., 'run snake.exe')
-   - `cls` - Clear screen
-   - `help` - Show help message
-   - `ip_connect <ip>` - Connect to a remote server
-   - `exit` - Exit the terminal
+dir - List directory contents
+cd - Change directory
+type - Display file contents
+run - Run a program (e.g., 'run snake.exe')
+cls - Clear screen
+help - Show help message
+ip_connect <ip> - Connect to a remote server
+exit - Exit the terminal
+Explore the directories to find clues and hidden secrets
 
-3. Explore the directories to find clues and hidden secrets
-4. Try playing the Snake game in the GAMES directory
+Try playing the Snake game in the GAMES directory
 
-## Project Structure
-
-```
+Project Structure
+Code
 ├── src
 │   ├── ascii_games.py    # ASCII games like Snake
 │   ├── crypto_utils.py   # Cryptography utilities
@@ -75,18 +73,13 @@ A text-based terminal game that simulates a retro DOS computer experience with s
 │   ├── remote_server.py  # Remote server simulation
 │   └── terminal_effects.py # Terminal visual effects
 └── main.py               # Main game entry point
-```
-
-## Tips
-
-- Look for clues in text files
-- The remote server might have valuable information
-- Use WASD keys to control the Snake game
-
-## Deployment on Replit
-
+Tips
+Look for clues in text files
+The remote server might have valuable information
+Use WASD keys to control the Snake game
+Deployment on Replit
 This game is designed to run on Replit. To deploy your own version:
 
-1. Fork the project
-2. Go to the "Deployment" tab
-3. Click "Deploy" to make it accessible online
+Fork the project
+Go to the "Deployment" tab
+Click "Deploy" to make it accessible online
