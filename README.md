@@ -1,5 +1,5 @@
 
-## [Hacker Terminal Simulator (Ciph3rSt3@lth)](https://replit.com/@cassiansl29/CipherStealth?v=1)
+## [Hacker Terminal Simulator (Ciph3rSt3@lth)](https://replit.com/@cassiansl29/hacker-terminal-game)
 
 A text-based terminal game that simulates a retro hacking experience with ASCII graphics.
 
