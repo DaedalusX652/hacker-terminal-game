@@ -4,14 +4,11 @@ import datetime
 from typing import List, Dict
 from dataclasses import dataclass
 from .terminal_effects import TerminalEffects
-from .crypto_utils import CryptoOperations
 
 @dataclass
 class FileNode:
     name: str
     content: str
-    is_encrypted: bool = False
-    is_hidden: bool = False
     permissions: str = "rw-r--r--"
     created_date: str = "2024-12-01"
     modified_date: str = "2024-12-01"
@@ -23,7 +20,6 @@ class RemoteServer:
     def __init__(self):
         self.current_path = "/home"  # Changed from "/" to "/home"
         self.effects = TerminalEffects()
-        self.crypto = CryptoOperations()
 
         # Initialize filesystem structure first
         self.filesystem = {}
@@ -31,38 +27,55 @@ class RemoteServer:
         self._initialize_filesystem()
 
     def _init_directory_structure(self):
-        """Initialize all directories first"""
+        """Initialize all directories with a more comprehensive structure"""
         directories = [
+            # Root and core system directories
             "/",
+            "/root",
+
+            # Home directories
             "/home",
             "/home/admin",
             "/home/researcher",
             "/home/security",
+
+            # System configuration and logs
+            "/etc",
             "/var",
             "/var/log",
-            "/etc",
-            "/secret",
+            "/var/tmp",
+
+            # Research and classified areas
             "/research",
             "/research/logs",
             "/research/classified",
+            "/research/data",
+
+            # Security and sensitive areas
+            "/secret",
+            "/blackbox",
             "/devices",
             "/devices/terminals",
-            "/blackbox"
-        ]
-        for directory in directories:
-            self.filesystem[directory] = {}
+            "/security",
 
-    def _add_file(self, path: str, content: str, is_encrypted: bool = False, 
-                  is_hidden: bool = False, permissions: str = "rw-r--r--",
+            # Temporary directories
+            "/tmp"
+        ]
+
+        for directory in directories:
+            # Ensure each directory is initialized in the filesystem
+            if directory not in self.filesystem:
+                self.filesystem[directory] = {}
+
+    def _add_file(self, path: str, content: str, 
+                  permissions: str = "rw-r--r--",
                   owner: str = "root", file_type: str = None):
         """
         Add a file to the filesystem with extended properties.
-        
+
         Args:
             path: Full file path including filename
             content: Text content of the file
-            is_encrypted: Whether the file should be encrypted
-            is_hidden: Whether the file should be hidden (starts with .)
             permissions: Unix-style permission string
             owner: File owner username
             file_type: Optional file type override (default: derived from filename)
@@ -71,22 +84,22 @@ class RemoteServer:
         if not directory:
             directory = "/"
         filename = path.split("/")[-1]
-        
+
         # Auto-detect file type from extension if not provided
         if file_type is None:
             if "." in filename:
                 file_type = filename.split(".")[-1]
             else:
                 file_type = "txt"  # Default
-        
+
         # Calculate a realistic file size
         file_size = len(content) + random.randint(10, 100)  # Add some variability
-        
+
         # Generate creation and modified dates
         base_date = time.strftime('%Y-%m-%d')
         modified_offset = random.randint(0, 30)  # Days ago
         created_offset = random.randint(modified_offset, 60)  # Even earlier
-        
+
         modified_date = (datetime.datetime.now() - 
                         datetime.timedelta(days=modified_offset)).strftime('%Y-%m-%d')
         created_date = (datetime.datetime.now() - 
@@ -100,8 +113,6 @@ class RemoteServer:
         self.filesystem[directory][filename] = FileNode(
             name=filename,
             content=content,
-            is_encrypted=is_encrypted,
-            is_hidden=is_hidden or filename.startswith('.'),
             permissions=permissions,
             created_date=created_date,
             modified_date=modified_date,
@@ -109,23 +120,22 @@ class RemoteServer:
             owner=owner,
             type=file_type
         )
-        
+
     def add_file_series(self, base_path: str, prefix: str, 
-                         contents: list, is_encrypted: bool = False):
+                         contents: list):
         """
         Add a series of related files with incrementing numbers.
-        
+
         Args:
             base_path: Base directory path
             prefix: Filename prefix
             contents: List of file contents
-            is_encrypted: Whether files should be encrypted
         """
         for i, content in enumerate(contents, 1):
             # Format with leading zeros: 001, 002, etc.
             file_num = f"{i:03d}"
             path = f"{base_path.rstrip('/')}/{prefix}_{file_num}.txt"
-            self._add_file(path, content, is_encrypted)
+            self._add_file(path, content)
 
     def _initialize_filesystem(self):
         """Initialize the filesystem with interesting content."""
@@ -138,7 +148,7 @@ blackbox:x:1003:1003:BlackBox System:/blackbox:/sbin/nologin""")
 
         self._add_file("/etc/shadow", """root:$6$xyz...encrypted...:19432:0:99999:7:::
 admin:$6$saltstring$encrypted_hash:19432:0:99999:7:::
-researcher:$6$another$different_hash:19432:0:99999:7:::""", True)
+researcher:$6$another$different_hash:19432:0:99999:7:::""")
 
         # Research logs
         self._add_file("/research/logs/experiment_001.log", """
@@ -165,7 +175,7 @@ The containment protocols are failing.
 Dr. Peterson's latest theory suggests they're not just shadows - they're tears in reality itself.
 The void is bleeding through.
 
-STATUS: CONTAINMENT BREACH IMMINENT""", True)
+STATUS: CONTAINMENT BREACH IMMINENT""")
 
         # Security logs
         self._add_file("/var/log/auth.log", """
@@ -191,14 +201,14 @@ The barrier between our world and theirs is weakening.
 
 The void hungers.
 
-- Last transmission from Dr. Sarah Chen""", True)
+- Last transmission from Dr. Sarah Chen""")
 
         # Black box data
         self._add_file("/blackbox/data.bin", """
 01010110 01001111 01001001 01000100 00100000
-01000011 01001111 01001101 01001001 01001110 
-01000111 00100000 01010100 01001000 01010010 
-01001111 01010101 01000111 01001000""", True)
+01000011 01001111 01001101 01001110 01000111 
+00100000 01010100 01001000 01010010 01001111 
+01010101 01000111 01001000""")
 
         self._add_file("/blackbox/README.txt", """
 BLACK BOX SYSTEM - CLASSIFIED
@@ -206,12 +216,6 @@ Access Level: OMEGA
 
 This system contains critical void containment data.
 DO NOT ATTEMPT TO DECRYPT WITHOUT AUTHORIZATION.""")
-
-        # Hidden files
-        self._add_file("/research/classified/.final_warning", """
-T̷h̷e̷y̷'̷r̷e̷ ̷h̷e̷r̷e̷.̷ ̷T̷h̷e̷y̷'̷r̷e̷ ̷i̷n̷s̷i̷d̷e̷ ̷t̷h̷e̷ ̷w̷a̷l̷l̷s̷.̷
-D̷o̷n̷'̷t̷ ̷l̷o̷o̷k̷ ̷a̷t̷ ̷t̷h̷e̷ ̷s̷h̷a̷d̷o̷w̷s̷.̷
-T̷h̷e̷y̷ ̷l̷o̷o̷k̷ ̷b̷a̷c̷k̷.̷""", True, True)
 
         # Admin directory content
         self._add_file("/home/admin/access_log.txt", """
@@ -234,18 +238,7 @@ These protocols can be used to manually override containment field settings
 in the event of primary system failure.
 
 WARNING: Improper use may result in complete containment failure.
-""", True, owner="admin")
-
-        self._add_file("/home/admin/.hidden_note", """
-If you're reading this, I've likely been compromised.
-The void entities are evolving faster than we anticipated.
-They've started mimicking human behavior - possibly even absorbing memories.
-
-Trust no one who's been in direct contact with the shadows.
-Emergency shutdown code: VX-7734-OMEGA
-
-- Administrator Chen
-""", False, True, owner="admin")
+""", owner="admin")
 
         # Researcher directory content
         self._add_file("/home/researcher/experiment_log_042.txt", """
@@ -291,7 +284,7 @@ WEAKNESSES:
 - Quantum stabilized barrier fields
 
 THREAT ASSESSMENT: EXTREME
-""", True, owner="researcher")
+""", owner="researcher")
 
         # Security directory content
         self._add_file("/home/security/incident_report_17.txt", """
@@ -340,7 +333,7 @@ In case of complete containment failure, initiate facility self-destruct
 sequence. Authorization codes in secure vault.
 
 NOTE: New entities appear more resistant to sonic deterrents.
-""", True, owner="security")
+""", owner="security")
 
         self._add_file("/var/log/security_recent.log", """
 [2024-12-22 03:14:22] [ALERT] Security breach detected in Sector 9
@@ -356,7 +349,7 @@ NOTE: New entities appear more resistant to sonic deterrents.
         # Quick return for root
         if path == '/':
             return '/'
-            
+
         # Handle relative paths
         if not path.startswith('/'):
             path = f"{self.current_path.rstrip('/')}/{path}"
@@ -420,9 +413,7 @@ NOTE: New entities appear more resistant to sonic deterrents.
 
         # Add files from current directory
         for filename, node in sorted(self.filesystem[path].items()):
-            if not node.is_hidden:
-                encrypted_marker = "[ENCRYPTED] " if node.is_encrypted else ""
-                output.append(f"<FILE>   {encrypted_marker}{filename}")
+            output.append(f"<FILE>   {filename}")
 
         # Format output
         if output:
@@ -457,8 +448,6 @@ NOTE: New entities appear more resistant to sonic deterrents.
             return f"cat: {args[0]}: No such file or directory"
 
         file_node = self.filesystem[directory][filename]
-        if file_node.is_encrypted:
-            return f"Error: File is encrypted. Access denied."
         return file_node.content
 
     def _pwd(self, args: List[str]) -> str:
@@ -489,10 +478,11 @@ exit    - Exit session"""
 
         server_art = """
         ===================
-        |    VOIDBORN    |
-        |  ============  |
-        |  ||  ||  ||   |
-        |  ||  ||  ||   |
+        |  Voidborn Tech  |
+        |  Main Labs Ser. |
+        |  =============  |
+        |   || || || ||   |
+        |   || || || ||   |
         ===================
         """
         self.effects.type_text(server_art)
