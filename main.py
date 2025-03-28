@@ -29,7 +29,7 @@ def display_home_computer():
     effects.type_text("HIMEM is testing extended memory...done. ")
     effects.type_text("Loading MS-DOS... ")
     effects.type_text("DEVICE=C:/DOS/HIMEM.SYS /TESTMEM:OFF")
-    effects.type_text("EVICE=C:/DOS/EMM386.EXE NOEMS")
+    effects.type_text("DEVICE=C:/DOS/EMM386.EXE NOEMS")
     effects.type_text("DEVICE=C:/DOS/OAKCDROM.SYS /D:MSCD001")
     time.sleep(0.5)
     effects.clear_screen()
