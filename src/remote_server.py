@@ -228,7 +228,7 @@ Latest system access:
 - System modifications: Updated firewall rules, modified containment protocols
 
 NOTE: Someone has been trying to access the main server. Check logs.
-""", owner="admin")
+""")
 
         self._add_file("/home/admin/security_override.dat", """
 SECURITY PROTOCOL OVERRIDE
@@ -238,7 +238,7 @@ These protocols can be used to manually override containment field settings
 in the event of primary system failure.
 
 WARNING: Improper use may result in complete containment failure.
-""", owner="admin")
+""")
 
         # Researcher directory content
         self._add_file("/home/researcher/experiment_log_042.txt", """
@@ -264,7 +264,7 @@ FOLLOW-UP:
 Test different sound patterns to see if we can reliably repel the entities.
 
 STATUS: ONGOING
-""", owner="researcher")
+""")
 
         self._add_file("/home/researcher/entity_profile.dat", """
 ENTITY CLASSIFICATION: VOID SHADOW
@@ -284,7 +284,7 @@ WEAKNESSES:
 - Quantum stabilized barrier fields
 
 THREAT ASSESSMENT: EXTREME
-""", owner="researcher")
+""")
 
         # Security directory content
         self._add_file("/home/security/incident_report_17.txt", """
@@ -313,7 +313,7 @@ Area remains under quarantine until further notice.
 RECOMMENDATIONS:
 Upgrade power backup systems. Current generators proved inadequate
 during extended outages.
-""", owner="security")
+""")
 
         self._add_file("/home/security/containment_protocol_V7.dat", """
 CONTAINMENT PROTOCOL: V7
@@ -333,7 +333,7 @@ In case of complete containment failure, initiate facility self-destruct
 sequence. Authorization codes in secure vault.
 
 NOTE: New entities appear more resistant to sonic deterrents.
-""", owner="security")
+""")
 
         self._add_file("/var/log/security_recent.log", """
 [2024-12-22 03:14:22] [ALERT] Security breach detected in Sector 9

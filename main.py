@@ -12,48 +12,48 @@ from src.ascii_games import SnakeGame
 def display_home_computer():
     effects = TerminalEffects()
     effects.clear_screen()
-    effects.type_text("\nAward BIOS v4.51PG, An Energy Star Ally")
-    effects.type_text("\nCopyright (C) 1984-1996, Award Software, Inc.")
+    effects.type_text("Award BIOS v4.51PG, An Energy Star Ally")
+    effects.type_text("Copyright (C) 1984-1996, Award Software, Inc.")
     time.sleep(0.5)
     effects.clear_screen()
-    effects.type_text("\nIntel Pentium Processor 166MHz")
-    effects.type_text("\nMemory Test: 8192K OK  ")
+    effects.type_text("Intel Pentium Processor 166MHz")
+    effects.type_text("Memory Test: 8192K OK  ")
     effects.clear_screen()
     time.sleep(0.5)
-    effects.type_text("\nPress DEL to enter Setup")
+    effects.type_text("Press DEL to enter Setup")
     time.sleep(0.00001)
     effects.clear_screen()
-    effects.type_text("\nStarting MS-DOS...")
+    effects.type_text("Starting MS-DOS...")
     time.sleep(0.5)
     effects.clear_screen()
-    effects.type_text("\nHIMEM is testing extended memory...done. ")
-    effects.type_text("\nLoading MS-DOS... ")
-    effects.type_text("\nDEVICE=C:/DOS/HIMEM.SYS /TESTMEM:OFF")
-    effects.type_text("\nEVICE=C:/DOS/EMM386.EXE NOEMS")
-    effects.type_text("\nDEVICE=C:/DOS/OAKCDROM.SYS /D:MSCD001")
+    effects.type_text("HIMEM is testing extended memory...done. ")
+    effects.type_text("Loading MS-DOS... ")
+    effects.type_text("DEVICE=C:/DOS/HIMEM.SYS /TESTMEM:OFF")
+    effects.type_text("EVICE=C:/DOS/EMM386.EXE NOEMS")
+    effects.type_text("DEVICE=C:/DOS/OAKCDROM.SYS /D:MSCD001")
     time.sleep(0.5)
     effects.clear_screen()
-    effects.type_text("\nC:/> PATH C:/DOS")
-    effects.type_text("\nC:/> PROMPT $P$G ")
-    effects.type_text("\nC:/> SET BLASTER=A220 I5 D1 H5 P330 T6 ")
-    effects.type_text("\nC:/> LH C:/DOS/MSCDEX.EXE /D:MSCD001")
+    effects.type_text("C:/> PATH C:/DOS")
+    effects.type_text("C:/> PROMPT $P$G ")
+    effects.type_text("C:/> SET BLASTER=A220 I5 D1 H5 P330 T6 ")
+    effects.type_text("C:/> LH C:/DOS/MSCDEX.EXE /D:MSCD001")
     time.sleep(0.5)
     effects.clear_screen()
-    effects.type_text("\nC:/> REM ██████.EXE detected")
-    effects.type_text("\nC:/> REM System error. Replace user.")
+    effects.type_text("C:/> REM ██████.EXE detected")
+    effects.type_text("C:/> REM System error. Replace user.")
     time.sleep(0.8)
     effects.clear_screen()
-    effects.type_text("\nC:/> REM Do not look at the screen.")
+    effects.type_text("C:/> REM Do not look at the screen.")
     time.sleep(0.8)
     effects.clear_screen()
-    effects.type_text("\nC:/> REMEM Do not look at the screen.")
+    effects.type_text("C:/> REMEM Do not look at the screen.")
     time.sleep(0.8)
     effects.clear_screen()
-    effects.type_text("\nC:/> REMEMBER Do not look at the screen.")
+    effects.type_text("C:/> REMEMBER Do not look at the screen.")
     time.sleep(0.8)
     effects.clear_screen()
     time.sleep(1.2)
-    effects.type_text("\nBootup successful")
+    effects.type_text("Bootup successful")
     effects.type_text("\nType 'help' for available commands")
     effects.clear_screen()
 
@@ -62,15 +62,15 @@ class HomeComputer:
         self.effects = TerminalEffects()
         # Simplified directory structure
         self.files = {
-            'DOCUMENTS': ['todo.txt', 'work.txt', 'SECRETS.txt'],
+            'DOCUMENTS': ['todo.txt', 'awman.txt', 'IAMWAITING.PLS'],
             'GAMES': ['snake.exe', 'tetris.exe'],
             'SYSTEM': ['config.sys', 'autoexec.bat']
         }
 
         self.file_contents = {
-            'todo.txt': "1. Clean up old files\n2. Update security software\n3. Check that weird network glitch",
-            'work.txt': "Just normal boring work stuff...\nDeadlines...\nMeetings...",
-            'SECRETS.txt': """FOUND THIS WHILE DIGGING THROUGH OLD ARCHIVES
+            'todo.txt': "1. Pay bills\n2. Update security software\n3. Check that weird network glitch",
+            'awman.txt': "Just normal boring work stuff...\nDeadlines...\nMeetings...",
+            'IAMWAITING.PLS': """FOUND THIS WHILE DIGGING THROUGH OLD ARCHIVES
 SOMETHING'S NOT RIGHT WITH THIS SERVER
 
 IP: 192.168.13.666
@@ -156,7 +156,7 @@ WHOEVER FINDS THIS, BE CAREFUL""",
             return "Missing program name"
 
         if self.current_dir != 'C:\\GAMES':
-            return "Can only run programs from C:\\GAMES"
+            return "File found in GAMES"
 
         program = args[0].lower()
         if program == 'snake.exe':
@@ -172,6 +172,23 @@ WHOEVER FINDS THIS, BE CAREFUL""",
             return "Tetris coming soon..."
 
         return f"Cannot run {program}"
+
+    def update_security(self):
+        """Simulate a security update."""
+        effects = self.effects
+        effects.clear_screen()
+        effects.type_text("\n[+] Initiating security system update...")
+        time.sleep(1)
+        effects.type_text("\n[+] Running system diagnostics...")
+        effects.progress_bar(0.5, "Checking security status")  # Fake progress bar
+        time.sleep(1)
+        effects.type_text("\n[+] Security Update Complete: Critical System Checks Passed!")
+        effects.type_text("\n[+] Running command for further security analysis...")
+        effects.progress_bar(0.3, "YOU SHOULD NOT BE HERE")  # Fake command execution progress
+        time.sleep(1)
+        effects.type_text("\n[+] F0LL0W TH3 SH3P3RD")
+        time.sleep(0.5)
+        effects.clear_screen()
 
     def handle_command(self, command: str) -> str:
         """Process user commands and return output."""
@@ -199,8 +216,10 @@ run      - Run a program (e.g., 'run snake.exe')
 cls      - Clear screen
 help     - Show this help message
 ip_connect <ip> - Connect to remote server
-exit     - Exit terminal""",
-            'ip_connect': lambda _: None
+exit     - Exit terminal
+secure-pc - Check for security updates""",
+            'ip_connect': lambda _: None,
+            'secure-pc': lambda _: self.update_security()
         }
 
         if cmd in commands:
