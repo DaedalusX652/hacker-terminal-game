@@ -54,7 +54,7 @@ def display_home_computer():
     effects.clear_screen()
     time.sleep(1.2)
     effects.type_text("Bootup successful")
-    effects.type_text("\nType 'help' for available commands")
+    effects.type_text("\nType 'help' for available commands\n")
 
 class HomeComputer:
     def __init__(self):
